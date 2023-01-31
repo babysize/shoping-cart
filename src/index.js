@@ -8,7 +8,8 @@ import ButtonBase from '@mui/material/ButtonBase';
 import IconButton from '@mui/material/IconButton';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import ShoppingBasketOutlinedIcon from '@mui/icons-material/ShoppingBasketOutlined';
-import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
+import { Stack } from '@mui/system';
 
 const Img = styled('img')({
   margin: 'auto',
@@ -17,7 +18,7 @@ const Img = styled('img')({
   maxHeight: '100%',
 });
 
-export default function ProductCart(props) {
+export default function ProductCard(props) {
   return (
     <Grid item xs={12} sm={6} md={4}>
     <Paper 
@@ -54,11 +55,20 @@ export default function ProductCart(props) {
                 <AddShoppingCartIcon />
               </IconButton>
             </Grid>
-            <Grid item sx={{display: props.count? 'block' : 'none',
-                            p: 1}}>
+            <Grid item sx={{display: props.count? 'block' : 'none', p:1}}>
+              <Stack spacing={1} direction="row" alignItems={'center'}>
+                <Button onClick={()=> {props.chanegCount(props,false)}} 
+                        variant='outlined' size='small'
+                        sx={{minWidth:30}} >
+                  -</Button>
                 <Typography gutterBottom variant="subtitle1" component="div" margin={0}>
                   {props.count} шт.
                 </Typography>
+                <Button onClick={() => {props.chanegCount(props,true)}} 
+                        variant='outlined' size='small' 
+                        sx={{minWidth:30}}>
+                  +</Button>
+              </Stack>
             </Grid>
           </Grid>
         </Grid>
@@ -72,13 +82,14 @@ class ProductList extends React.Component {
 
     render() {
         const products = this.props.products.map((product) =>
-          <ProductCart
+          <ProductCard
             key={product.id}
             name={product.name}
             path={product.path}
             coast={product.coast} 
             count={product.count}
             onClick={() => this.props.onClick(product)}
+            chanegCount={(product,isAdd) => this.props.chanegCount(product,isAdd)}
           />
         )
 
@@ -164,6 +175,38 @@ class Shop extends React.Component {
     })
   }
 
+  chanegCount(product,isAdd) {
+    const number = isAdd ? 1 : -1
+
+    const products = this.state.products.map(p =>
+      p.name === product.name
+        ? {...p, count: p.count+number} 
+        : p)
+
+    const cart = product.count === 1 && !isAdd 
+                ? this.state.cart.filter(p => p.name !== product.name)
+                : this.state.cart.map(p =>
+                      p.name === product.name
+                      ? {...p, count: p.count+number} 
+                      : p) 
+
+
+    // const cart = []
+    // if(product.count === 1 && !isAdd ){ 
+    //     cart = this.state.cart.filter(p => p.name !== product.name)
+    //   } else{
+    //     cart = this.state.cart.map(p =>
+    //     p.name === product.name
+    //       ? {...p, count: p.count+number} 
+    //       : p)  
+    //   }
+
+    this.setState({
+      cart: cart,
+      products: products
+    })
+  }
+
   render () {
 
     return(
@@ -174,6 +217,7 @@ class Shop extends React.Component {
       </IconButton>
       <ProductList products={this.state.products}
                    onClick={product => this.handleClick(product)}
+                   chanegCount={(product,isAdd) => this.chanegCount(product,isAdd)}
       />
     </div>
     )
