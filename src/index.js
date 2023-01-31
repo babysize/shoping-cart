@@ -10,6 +10,8 @@ import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import ShoppingBasketOutlinedIcon from '@mui/icons-material/ShoppingBasketOutlined';
 import Button from '@mui/material/Button';
 import { Stack } from '@mui/system';
+import { Drawer, List } from '@mui/material';
+
 
 const Img = styled('img')({
   margin: 'auto',
@@ -102,7 +104,23 @@ class ProductList extends React.Component {
 }
 
 class ShoppingCart extends React.Component {
-  
+
+  render() {    
+    return (      
+      <div>
+        <IconButton onClick={() => this.props.onClick(this.props.isVisible)}
+                    sx={{margin: 2}} color="primary" aria-label="open shopping cart">
+          <ShoppingBasketOutlinedIcon/>
+        </IconButton>
+        <Drawer anchor='left' 
+                open={this.props.isVisible}
+                onClose={() => this.props.onClick(this.props.isVisible)}>
+          <p >i am product in cart</p>
+          <p >i am product in cart</p>
+        </Drawer>
+      </div>
+    )
+  }
 }
 
 class Shop extends React.Component {
@@ -161,6 +179,7 @@ class Shop extends React.Component {
         }
         ],
       cart: [],
+      cartIsVisible: false,
     }
   }
 
@@ -183,23 +202,12 @@ class Shop extends React.Component {
         ? {...p, count: p.count+number} 
         : p)
 
-    const cart = product.count === 1 && !isAdd 
+    const cart = (product.count === 1 && !isAdd)
                 ? this.state.cart.filter(p => p.name !== product.name)
                 : this.state.cart.map(p =>
                       p.name === product.name
                       ? {...p, count: p.count+number} 
                       : p) 
-
-
-    // const cart = []
-    // if(product.count === 1 && !isAdd ){ 
-    //     cart = this.state.cart.filter(p => p.name !== product.name)
-    //   } else{
-    //     cart = this.state.cart.map(p =>
-    //     p.name === product.name
-    //       ? {...p, count: p.count+number} 
-    //       : p)  
-    //   }
 
     this.setState({
       cart: cart,
@@ -207,14 +215,20 @@ class Shop extends React.Component {
     })
   }
 
+  showCart(cartIsVisible){
+    this.setState({
+      cartIsVisible: !cartIsVisible
+    })
+  }
+
   render () {
 
     return(
     <div>
-      <IconButton sx={{margin: 2}} 
-                  color="primary" aria-label="open shopping cart">
-        <ShoppingBasketOutlinedIcon/>
-      </IconButton>
+      <ShoppingCart cart={this.state.cart}
+                    isVisible={this.state.cartIsVisible}
+                    onClick={cartIsVisible => this.showCart(cartIsVisible)}
+      />
       <ProductList products={this.state.products}
                    onClick={product => this.handleClick(product)}
                    chanegCount={(product,isAdd) => this.chanegCount(product,isAdd)}
