@@ -13,8 +13,9 @@ import Stack from '@mui/material/Stack';
 import Drawer from '@mui/material/Drawer';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Badge from '@mui/material/Badge';
+import CloseIcon from '@mui/icons-material/Close';
 import Fab from '@mui/material/Fab';
-
+import { Group } from '@mui/icons-material';
 
 
 const Img = styled('img')({
@@ -26,7 +27,7 @@ const Img = styled('img')({
 
 function ProductCard(props) {
   return (
-    <Grid item xs={12} sm={6} md={4}>
+    <Grid item xs={12} sm={6} lg={4}>
     <Paper 
       sx={{
         p: 1,
@@ -112,7 +113,7 @@ function ProductInCart(props) {
     <Grid item>  
       <Grid container>
         <Grid item>
-          <ButtonBase sx={{ width: 70, height: 70 }}>
+          <ButtonBase sx={{ width: 70, height: 70, paddingRight:2}}>
             <Img alt="complex" src={props.path}/>
           </ButtonBase>
         </Grid>
@@ -155,7 +156,7 @@ function ProductInCart(props) {
               </Stack>
               <Grid item xs={5} sx={{textAlign:'end'}}>
                 <Typography variant="subtitle2" component="div">
-                  {Math.floor((props.coast * props.count +Number.EPSILON )*100)/100} $
+                  {props.sum} $
                 </Typography>
               </Grid>
             </Grid>
@@ -166,8 +167,10 @@ function ProductInCart(props) {
   )
 }
 
-
 class ShoppingCart extends React.Component {
+  round(a){
+    return Math.round((a+Number.EPSILON)*100)/100
+  }
 
   render() {  
     const products = this.props.cart.map((product) =>
@@ -177,6 +180,7 @@ class ShoppingCart extends React.Component {
             path={product.path}
             coast={product.coast} 
             count={product.count}
+            sum={this.round(product.coast*product.count)}
             chanegCount={(product,isAdd) => this.props.chanegCount(product,isAdd)}
             deletProductFromCart={() => this.props.deletProductFromCart(product)}
           />
@@ -184,27 +188,59 @@ class ShoppingCart extends React.Component {
 
     const countProducts = products.length 
 
-    return (      
-      <div>
-        <IconButton onClick={() => this.props.onClick(this.props.isVisible)}
-                    sx={{margin: 1}} color="primary" aria-label="open shopping cart">
-          <Badge badgeContent={countProducts} color="primary">
-            <ShoppingBasketOutlinedIcon/>
-          </Badge>
-        </IconButton>
-        <Drawer anchor='left' 
-                open={this.props.isVisible}
-                onClose={() => this.props.onClick(this.props.isVisible)}
-                >
-          <Grid container direction='column' p={0} sx={{width:300, marginBottom:'36px'}} overflow="scroll" wrap='nowrap'>
+    const sum = this.props.cart.reduce((acc,curr) => 
+            this.round(acc+this.round(curr.count*curr.coast))
+            ,0)
+
+    const windowInnerWidth = window.innerWidth
+    if(windowInnerWidth < 1200){
+      return (      
+        <>
+          <Fab onClick={() => this.props.onClick(this.props.isVisible)}
+                      sx={{position:'absolute', bottom:10, right:10, margin: 1}} 
+                      color="primary" aria-label="open shopping cart" size="large">
+            <Badge badgeContent={countProducts} color="primary">
+              <ShoppingBasketOutlinedIcon/>
+            </Badge>
+          </Fab>
+          <Drawer anchor='right'
+                  open={this.props.isVisible}
+                  onClose={() => this.props.onClick(this.props.isVisible)}
+                  PaperProps={{sx:{width:{xs:'100%', sm:'50%'}}}}
+                  >
+            <Grid container justifyContent='space-between' alignItems='center'>
+              <Typography variant='h5' color='green' margin={2}>Корзина</Typography>
+              <IconButton onClick={() => this.props.onClick(this.props.isVisible)}>
+                <CloseIcon/>
+              </IconButton>
+            </Grid>
+            <Grid container direction='column' p={1} sx={{marginBottom:'30px','&::-webkit-scrollbar': {width: 0}}}
+                  overflow="scroll" wrap='nowrap'>
+              {products}
+            </Grid>
+            <Button variant="contained" 
+                    sx={{width:'100%', bottom:0, position: "absolute", bottom: 0, borderRadius:0,
+                    display:sum==0 ? 'none' : 'block'}}>
+              Оплатить {sum}$
+            </Button>
+          </Drawer>
+        </>
+      )
+    }else{
+      return (
+        <div sx={{position:"absolute", right:0}}>
+          <Typography variant='h5' color='green'>Корзина</Typography>
+          <Grid container direction='column' overflow="scroll" wrap='nowrap' 
+                sx={{marginBottom:'36px','&::-webkit-scrollbar': {width: 0}}}>
             {products}
+            <Button variant="contained" 
+                    sx={{display:sum==0 ? 'none' : 'block'}}>
+              Оплатить {sum}$
+            </Button>
           </Grid>
-          <Button variant="contained" sx={{width:'100%', bottom:0, position: "absolute", bottom: 0}}>
-            Оплатить заказ
-          </Button>
-        </Drawer>
-      </div>
-    )
+       </div>
+      )
+    }   
   }
 }
 
@@ -265,6 +301,7 @@ class Shop extends React.Component {
         ],
       cart: [],
       cartIsVisible: false,
+      width:0,
     }
   }
 
@@ -307,7 +344,6 @@ class Shop extends React.Component {
         : p)
 
     const cart = this.state.cart.filter(p => p.name !== product.name)
-      console.log("i am working")
     this.setState({
       cart: cart,
       products: products,
@@ -320,20 +356,38 @@ class Shop extends React.Component {
     })
   }
 
-  render () {
+  updateDimensions = () => {
+    this.setState({ width: window.innerWidth});
+  };
 
+  componentDidMount() {
+    window.addEventListener('resize', this.updateDimensions);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateDimensions);
+  }
+
+  render () {
     return(
     <div>
-      <ShoppingCart cart={this.state.cart}
-                    isVisible={this.state.cartIsVisible}
-                    onClick={cartIsVisible => this.showCart(cartIsVisible)}
+      <Typography variant='h2' margin={3} color='green'>Market</Typography>
+      <Grid container spacing={2}>
+      <Grid item xs={12} lg={8}>
+        <ProductList products={this.state.products}
+                    onClick={product => this.handleClick(product)}
                     chanegCount={(product,isAdd) => this.chanegCount(product,isAdd)}
-                    deletProductFromCart={product => this.deletProductFromCart(product)}
-      />
-      <ProductList products={this.state.products}
-                   onClick={product => this.handleClick(product)}
-                   chanegCount={(product,isAdd) => this.chanegCount(product,isAdd)}
-      />
+        />
+        </Grid>
+        <Grid item md={4}>
+        <ShoppingCart cart={this.state.cart}
+                      isVisible={this.state.cartIsVisible}
+                      onClick={cartIsVisible => this.showCart(cartIsVisible)}
+                      chanegCount={(product,isAdd) => this.chanegCount(product,isAdd)}
+                      deletProductFromCart={product => this.deletProductFromCart(product)}
+        />
+        </Grid>
+      </Grid>
     </div>
     )
   }
@@ -343,9 +397,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<Shop/>);
 
 
-//подсчитать итог
-//добавить заголовки к корзине и товаров
-//кнопка закрытия корзины
-//размер двоувера адаптивный
 //адаптивнфе размеры шрифтов и отступов (небыло измерения в абсолытных е.и.)
-//
+//редактирование ручками колличества товара
+//ререндер при скроле
+//заменить все внешние div на фрагменты
