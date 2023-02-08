@@ -15,7 +15,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Badge from '@mui/material/Badge';
 import CloseIcon from '@mui/icons-material/Close';
 import Fab from '@mui/material/Fab';
-import { Group } from '@mui/icons-material';
+import TextField from '@mui/material/TextField';
+import { type } from '@testing-library/user-event/dist/type';
 
 
 const Img = styled('img')({
@@ -69,7 +70,7 @@ function ProductCard(props) {
                         sx={{minWidth:30}} >
                   -</Button>
                 <Typography gutterBottom variant="subtitle1" component="div" margin={0}>
-                  {props.count} шт.
+                  {props.count} кг
                 </Typography>
                 <Button onClick={() => {props.chanegCount(props,true)}} 
                         variant='outlined' size='small' 
@@ -101,7 +102,7 @@ class ProductList extends React.Component {
         )
 
         return (
-           <Grid container spacing={1}>
+           <Grid container spacing={1} overflow="scroll">
             {products}
           </Grid>
         )
@@ -134,7 +135,7 @@ function ProductInCart(props) {
           </Grid>
           <Grid item>
             <Typography gutterBottom variant="caption" component="div" sx={{color:'grey'}}>
-              {props.coast} за шт.
+              {props.coast} за кг
             </Typography>
           </Grid>
           <Grid item xs container alignItems='end'>
@@ -145,14 +146,16 @@ function ProductInCart(props) {
                 <Button onClick={()=> {props.chanegCount(props,false)}} 
                         variant='text' size='small'
                         sx={{minWidth:15}} >
-                  -</Button>
-                <Typography gutterBottom variant="subtitle2" component="div" margin={0}>
-                  {props.count}
-                </Typography>
+                -</Button>
+                <TextField value={props.count} sx={{width: '3ch', "& fieldset": { border: 'none' }}} 
+                           inputProps={{style:{padding:0, textAlign:"center"}}}
+                           onChange={(e) => {props.handleChangeCount(props,e.target.value)}}
+                           onBlur={() => {props.editCount(props)}}
+                />
                 <Button onClick={() => {props.chanegCount(props,true)}} 
                         variant='text' size='small' 
                         sx={{minWidth:15}}>
-                  +</Button>
+                +</Button>
               </Stack>
               <Grid item xs={5} sx={{textAlign:'end'}}>
                 <Typography variant="subtitle2" component="div">
@@ -183,6 +186,8 @@ class ShoppingCart extends React.Component {
             sum={this.round(product.coast*product.count)}
             chanegCount={(product,isAdd) => this.props.chanegCount(product,isAdd)}
             deletProductFromCart={() => this.props.deletProductFromCart(product)}
+            handleChangeCount={(product,number) => this.props.handleChangeCount(product,number)}
+            editCount={product => this.props.editCount(product)}
           />
         )
 
@@ -197,7 +202,7 @@ class ShoppingCart extends React.Component {
       return (      
         <>
           <Fab onClick={() => this.props.onClick(this.props.isVisible)}
-                      sx={{position:'absolute', bottom:10, right:10, margin: 1}} 
+                      sx={{position:'fixed', bottom:20, right:20}} 
                       color="primary" aria-label="open shopping cart" size="large">
             <Badge badgeContent={countProducts} color="primary">
               <ShoppingBasketOutlinedIcon/>
@@ -214,7 +219,8 @@ class ShoppingCart extends React.Component {
                 <CloseIcon/>
               </IconButton>
             </Grid>
-            <Grid container direction='column' p={1} sx={{marginBottom:'30px','&::-webkit-scrollbar': {width: 0}}}
+            <Grid container direction='column' p={1} 
+                  sx={{marginBottom:'30px','&::-webkit-scrollbar': {width: 0}}}
                   overflow="scroll" wrap='nowrap'>
               {products}
             </Grid>
@@ -297,11 +303,82 @@ class Shop extends React.Component {
           path: "images/products/pumpkin.jpeg",
           coast: 11.49,
           count: 0,
+        },
+        {
+          id: '#31',
+          name:'Potato1',
+          path: "images/products/potato.jpeg",
+          coast: 1.99,
+          count: 0,
+        },
+        {
+          id: '#41',
+          name:'Cucumber1',
+          path: "images/products/cucumber.jpeg",
+          coast: 2.49,
+          count: 0,
+        },
+        {
+          id: '#51',
+          name:'Broccoli1',
+          path: "images/products/broccoli.jpeg",
+          coast: 21.99,
+          count: 0,
+        },
+        {
+          id: '#61',
+          name:'Onion1',
+          path: "images/products/onion.jpeg",
+          coast: 0.99,
+          count: 0,
+        },
+        {
+          id: '#71',
+          name:'Pumpkin1',
+          path: "images/products/pumpkin.jpeg",
+          coast: 11.49,
+          count: 0,
+        },
+        {
+          id: '#32',
+          name:'Potato2',
+          path: "images/products/potato.jpeg",
+          coast: 1.99,
+          count: 0,
+        },
+        {
+          id: '#42',
+          name:'Cucumber2',
+          path: "images/products/cucumber.jpeg",
+          coast: 2.49,
+          count: 0,
+        },
+        {
+          id: '#52',
+          name:'Broccoli2',
+          path: "images/products/broccoli.jpeg",
+          coast: 21.99,
+          count: 0,
+        },
+        {
+          id: '#62',
+          name:'Onion2',
+          path: "images/products/onion.jpeg",
+          coast: 0.99,
+          count: 0,
+        },
+        {
+          id: '#72',
+          name:'Pumpkin2',
+          path: "images/products/pumpkin.jpeg",
+          coast: 11.49,
+          count: 0,
         }
         ],
       cart: [],
       cartIsVisible: false,
       width:0,
+      scroll:0,
     }
   }
 
@@ -330,6 +407,42 @@ class Shop extends React.Component {
                       p.name === product.name
                       ? {...p, count: p.count+number} 
                       : p) 
+
+    this.setState({
+      cart: cart,
+      products: products
+    })
+  }
+
+  handleChangeCount(product, number) {
+    const products = this.state.products.map(p =>
+      p.name === product.name
+        ? {...p, count: number} 
+        : p)
+    
+    const cart = this.state.cart.map(p =>
+                      p.name === product.name
+                      ? {...p, count: number} 
+                      : p)    
+
+    this.setState({
+      cart: cart,
+      products: products
+    })
+  }
+
+  editCount(product){
+    const n = product.count>0  ? product.count : 1
+   
+    const products = this.state.products.map(p =>
+      p.name === product.name
+        ? {...p, count: n} 
+        : p)
+    
+    const cart = this.state.cart.map(p =>
+                      p.name === product.name
+                      ? {...p, count: n} 
+                      : p)    
 
     this.setState({
       cart: cart,
@@ -370,7 +483,7 @@ class Shop extends React.Component {
 
   render () {
     return(
-    <div>
+    <>
       <Typography variant='h2' margin={3} color='green'>Market</Typography>
       <Grid container spacing={2}>
       <Grid item xs={12} lg={8}>
@@ -385,10 +498,12 @@ class Shop extends React.Component {
                       onClick={cartIsVisible => this.showCart(cartIsVisible)}
                       chanegCount={(product,isAdd) => this.chanegCount(product,isAdd)}
                       deletProductFromCart={product => this.deletProductFromCart(product)}
+                      handleChangeCount={(product,number) => this.handleChangeCount(product,number)}
+                      editCount={product => this.editCount(product)}
         />
         </Grid>
       </Grid>
-    </div>
+    </>
     )
   }
 }
@@ -397,7 +512,6 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<Shop/>);
 
 
-//адаптивнфе размеры шрифтов и отступов (небыло измерения в абсолытных е.и.)
-//редактирование ручками колличества товара
-//ререндер при скроле
-//заменить все внешние div на фрагменты
+//адаптивнфе размеры шрифтов и отступов (не было измерения в абсолытных е.и.)
+//рефакторинг
+//скролинг корзины
