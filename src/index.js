@@ -16,8 +16,6 @@ import Badge from '@mui/material/Badge';
 import CloseIcon from '@mui/icons-material/Close';
 import Fab from '@mui/material/Fab';
 import TextField from '@mui/material/TextField';
-import { type } from '@testing-library/user-event/dist/type';
-
 
 const Img = styled('img')({
   margin: 'auto',
@@ -39,40 +37,40 @@ function ProductCard(props) {
       <Grid container>
         <Grid item>
           <ButtonBase sx={{ width: 100, height: 100 }}>
-            <Img alt="complex" src={props.path}/>
+            <Img alt="complex" src={props.product.path}/>
           </ButtonBase>
         </Grid>
         <Grid item xs sm container direction="column">
           <Grid item xs container direction="row">
             <Grid item xs={7}>
               <Typography gutterBottom variant="subtitle1" component="div">
-                {props.name}
+                {props.product.name}
               </Typography>
             </Grid>
             <Grid item xs={5} sx={{textAlign:'end'}}>
               <Typography variant="subtitle1" component="div">
-                {props.coast} $
+                {props.product.coast} $
               </Typography>
             </Grid>
           </Grid>
           <Grid item xs container alignItems='end'>
             <Grid item>
-              <IconButton onClick={()=>{props.onClick(props)}} 
-                          sx={{display: props.count? 'none' : 'block'}} 
+              <IconButton onClick={()=>{props.addNewProductInCart(props)}} 
+                          sx={{display: props.product.count? 'none' : 'block'}} 
                           color="primary" aria-label="add to shopping cart">
                 <AddShoppingCartIcon />
               </IconButton>
             </Grid>
-            <Grid item sx={{display: props.count? 'block' : 'none', p:1}}>
+            <Grid item sx={{display: props.product.count? 'block' : 'none', p:1}}>
               <Stack spacing={1} direction="row" alignItems={'center'}>
-                <Button onClick={()=> {props.chanegCount(props,false)}} 
+                <Button onClick={()=> {props.changeCountByOne(props.product.id,props.product.count,false)}} 
                         variant='outlined' size='small'
                         sx={{minWidth:30}} >
                   -</Button>
                 <Typography gutterBottom variant="subtitle1" component="div" margin={0}>
-                  {props.count} кг
+                  {props.product.count} кг
                 </Typography>
-                <Button onClick={() => {props.chanegCount(props,true)}} 
+                <Button onClick={() => {props.changeCountByOne(props.product.id,props.product.count,true)}} 
                         variant='outlined' size='small' 
                         sx={{minWidth:30}}>
                   +</Button>
@@ -90,19 +88,17 @@ class ProductList extends React.Component {
 
     render() {
         const products = this.props.products.map((product) =>
+        <React.Fragment key={product.id}>
           <ProductCard
-            key={product.id}
-            name={product.name}
-            path={product.path}
-            coast={product.coast} 
-            count={product.count}
-            onClick={() => this.props.onClick(product)}
-            chanegCount={(product,isAdd) => this.props.chanegCount(product,isAdd)}
+            product={product}
+            addNewProductInCart={() => this.props.addNewProductInCart(product)}
+            changeCountByOne={(id,count,isAdd) => this.props.changeCountByOne(id,count,isAdd)}
           />
+        </React.Fragment>
         )
 
         return (
-           <Grid container spacing={1} overflow="scroll">
+           <Grid container spacing={1} overflow="scroll" sx={{'&::-webkit-scrollbar': {width: 0}}}>
             {products}
           </Grid>
         )
@@ -115,7 +111,7 @@ function ProductInCart(props) {
       <Grid container>
         <Grid item>
           <ButtonBase sx={{ width: 70, height: 70, paddingRight:2}}>
-            <Img alt="complex" src={props.path}/>
+            <Img alt="complex" src={props.product.path}/>
           </ButtonBase>
         </Grid>
         <Grid item xs sm container direction="column">
@@ -123,19 +119,19 @@ function ProductInCart(props) {
                 justifyContent="space-between" alignItems="center">
             <Grid item>
               <Typography gutterBottom variant="subtitle1" component="div" margin={0}>
-                {props.name}
+                {props.product.name}
               </Typography>
             </Grid>
             <Grid>
               <IconButton aria-label="delete"
-                          onClick={() => {props.deletProductFromCart(props)}}>
+                          onClick={() => {props.deletProductFromCart(props.product.id)}}>
                 <DeleteIcon fontSize="small"/>
               </IconButton>
             </Grid>
           </Grid>
           <Grid item>
             <Typography gutterBottom variant="caption" component="div" sx={{color:'grey'}}>
-              {props.coast} за кг
+              {props.product.coast} за кг
             </Typography>
           </Grid>
           <Grid item xs container alignItems='end'>
@@ -143,16 +139,16 @@ function ProductInCart(props) {
                   justifyContent={"space-between"} alignItems={"center"}
                   sx={{paddingRight:1}}>
               <Stack xs={7} spacing={1} direction="row" alignItems={"center"}>
-                <Button onClick={()=> {props.chanegCount(props,false)}} 
+                <Button onClick={()=> {props.changeCountByOne(props.product.id,props.product.count,false)}} 
                         variant='text' size='small'
                         sx={{minWidth:15}} >
                 -</Button>
-                <TextField value={props.count} sx={{width: '3ch', "& fieldset": { border: 'none' }}} 
+                <TextField value={props.product.count} sx={{width: '3ch', "& fieldset": { border: 'none' }}} 
                            inputProps={{style:{padding:0, textAlign:"center"}}}
-                           onChange={(e) => {props.handleChangeCount(props,e.target.value)}}
-                           onBlur={() => {props.editCount(props)}}
+                           onChange={(e) => {props.handleChangeCount(props.product.id,Number(e.target.value))}}
+                           onBlur={() => {props.editCount(props.product.id,props.product.count)}}
                 />
-                <Button onClick={() => {props.chanegCount(props,true)}} 
+                <Button onClick={() => {props.changeCountByOne(props.product.id,props.product.count,true)}} 
                         variant='text' size='small' 
                         sx={{minWidth:15}}>
                 +</Button>
@@ -177,18 +173,17 @@ class ShoppingCart extends React.Component {
 
   render() {  
     const products = this.props.cart.map((product) =>
+        <React.Fragment key={product.id}>
           <ProductInCart
-            key={product.id}
-            name={product.name}
-            path={product.path}
-            coast={product.coast} 
-            count={product.count}
+            product={product}
             sum={this.round(product.coast*product.count)}
-            chanegCount={(product,isAdd) => this.props.chanegCount(product,isAdd)}
-            deletProductFromCart={() => this.props.deletProductFromCart(product)}
-            handleChangeCount={(product,number) => this.props.handleChangeCount(product,number)}
-            editCount={product => this.props.editCount(product)}
+            changeCountByOne={(id,count,isAdd) => this.props.changeCountByOne(id,count,isAdd)}
+            deletProductFromCart={(id) => this.props.deletProductFromCart(id)}
+            handleChangeCount={(id,number) => this.props.handleChangeCount(id,number)}
+            editCount={(id,count) => this.props.editCount(id,count)}
           />
+          </React.Fragment>
+          
         )
 
     const countProducts = products.length 
@@ -236,8 +231,7 @@ class ShoppingCart extends React.Component {
       return (
         <div sx={{position:"absolute", right:0}}>
           <Typography variant='h5' color='green'>Корзина</Typography>
-          <Grid container direction='column' overflow="scroll" wrap='nowrap' 
-                sx={{marginBottom:'36px','&::-webkit-scrollbar': {width: 0}}}>
+          <Grid container direction='column' wrap='nowrap'>
             {products}
             <Button variant="contained" 
                     sx={{display:sum==0 ? 'none' : 'block'}}>
@@ -382,9 +376,9 @@ class Shop extends React.Component {
     }
   }
 
-  handleClick(product) {
+  addNewProductInCart(product) {
     const products = this.state.products.map(p =>
-      p.name === product.name
+      p.id === product.id
         ? {...p, count: 1} 
         : p)
     this.setState({
@@ -393,18 +387,18 @@ class Shop extends React.Component {
     })
   }
 
-  chanegCount(product,isAdd) {
+  changeCountByOne(id,count,isAdd) {
     const number = isAdd ? 1 : -1
 
     const products = this.state.products.map(p =>
-      p.name === product.name
+      p.id === id
         ? {...p, count: p.count+number} 
         : p)
 
-    const cart = (product.count === 1 && !isAdd)
-                ? this.state.cart.filter(p => p.name !== product.name)
+    const cart = (count === 1 && !isAdd)
+                ? this.state.cart.filter(p => p.id !== id)
                 : this.state.cart.map(p =>
-                      p.name === product.name
+                      p.id === id
                       ? {...p, count: p.count+number} 
                       : p) 
 
@@ -414,49 +408,44 @@ class Shop extends React.Component {
     })
   }
 
-  handleChangeCount(product, number) {
-    const products = this.state.products.map(p =>
-      p.name === product.name
-        ? {...p, count: number} 
-        : p)
-    
+  handleChangeCount(id, number) {
     const cart = this.state.cart.map(p =>
-                      p.name === product.name
+                      p.id === id
                       ? {...p, count: number} 
                       : p)    
 
     this.setState({
       cart: cart,
-      products: products
     })
   }
 
-  editCount(product){
-    const n = product.count>0  ? product.count : 1
-   
+  editCount(id,count){
+    const n = count>0  ? count : 1
+
     const products = this.state.products.map(p =>
-      p.name === product.name
+      p.id === id
         ? {...p, count: n} 
         : p)
     
     const cart = this.state.cart.map(p =>
-                      p.name === product.name
+                      p.id === id
                       ? {...p, count: n} 
                       : p)    
 
+                    
     this.setState({
       cart: cart,
       products: products
     })
   }
 
-  deletProductFromCart(product){
+  deletProductFromCart(id){
     const products = this.state.products.map(p =>
-      p.name === product.name
+      p.id === id
         ? {...p, count: 0} 
         : p)
 
-    const cart = this.state.cart.filter(p => p.name !== product.name)
+    const cart = this.state.cart.filter(p => p.id !== id)
     this.setState({
       cart: cart,
       products: products,
@@ -486,20 +475,20 @@ class Shop extends React.Component {
     <>
       <Typography variant='h2' margin={3} color='green'>Market</Typography>
       <Grid container spacing={2}>
-      <Grid item xs={12} lg={8}>
+      <Grid item xs={12} lg={9}>
         <ProductList products={this.state.products}
-                    onClick={product => this.handleClick(product)}
-                    chanegCount={(product,isAdd) => this.chanegCount(product,isAdd)}
+                    addNewProductInCart={product => this.addNewProductInCart(product)}
+                    changeCountByOne={(id,count,isAdd) => this.changeCountByOne(id,count,isAdd)}
         />
         </Grid>
-        <Grid item md={4}>
+        <Grid item lg={3}>
         <ShoppingCart cart={this.state.cart}
                       isVisible={this.state.cartIsVisible}
                       onClick={cartIsVisible => this.showCart(cartIsVisible)}
-                      chanegCount={(product,isAdd) => this.chanegCount(product,isAdd)}
-                      deletProductFromCart={product => this.deletProductFromCart(product)}
-                      handleChangeCount={(product,number) => this.handleChangeCount(product,number)}
-                      editCount={product => this.editCount(product)}
+                      changeCountByOne={(id,count,isAdd) => this.changeCountByOne(id,count,isAdd)}
+                      deletProductFromCart={id => this.deletProductFromCart(id)}
+                      handleChangeCount={(id,number) => this.handleChangeCount(id,number)}
+                      editCount={(id,count) => this.editCount(id,count)}
         />
         </Grid>
       </Grid>
@@ -513,5 +502,10 @@ root.render(<Shop/>);
 
 
 //адаптивнфе размеры шрифтов и отступов (не было измерения в абсолытных е.и.)
-//рефакторинг
-//скролинг корзины
+//рефакторинг:
+//  -каждый компонент в своем файле
+//  -определять элементы по айди
+//  -не передавать в функцию то что ей не надо
+//  -чистые функции?
+//один компонент для селектора колличества товара
+//тест на компонент селектора товаров
