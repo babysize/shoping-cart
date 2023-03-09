@@ -4,132 +4,13 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import Cart from './components/Cart';
 import ProductList from './components/ProductList';
+import Products from './resourses/Products.json'
 
 class Shop extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      products: [
-        {
-          id: '#1',
-          name:'Carrot',
-          path: "images/products/carrot.jpg",
-          coast: 4.99,
-          count: 0,
-        },
-        {
-          id: '#2',
-          name:'Tomato',
-          path: "images/products/tomato.jpeg",
-          coast: 9.49,
-          count: 0,
-        },
-        {
-          id: '#3',
-          name:'Potato',
-          path: "images/products/potato.jpeg",
-          coast: 1.99,
-          count: 0,
-        },
-        {
-          id: '#4',
-          name:'Cucumber',
-          path: "images/products/cucumber.jpeg",
-          coast: 2.49,
-          count: 0,
-        },
-        {
-          id: '#5',
-          name:'Broccoli',
-          path: "images/products/broccoli.jpeg",
-          coast: 21.99,
-          count: 0,
-        },
-        {
-          id: '#6',
-          name:'Onion',
-          path: "images/products/onion.jpeg",
-          coast: 0.99,
-          count: 0,
-        },
-        {
-          id: '#7',
-          name:'Pumpkin',
-          path: "images/products/pumpkin.jpeg",
-          coast: 11.49,
-          count: 0,
-        },
-        {
-          id: '#31',
-          name:'Potato1',
-          path: "images/products/potato.jpeg",
-          coast: 1.99,
-          count: 0,
-        },
-        {
-          id: '#41',
-          name:'Cucumber1',
-          path: "images/products/cucumber.jpeg",
-          coast: 2.49,
-          count: 0,
-        },
-        {
-          id: '#51',
-          name:'Broccoli1',
-          path: "images/products/broccoli.jpeg",
-          coast: 21.99,
-          count: 0,
-        },
-        {
-          id: '#61',
-          name:'Onion1',
-          path: "images/products/onion.jpeg",
-          coast: 0.99,
-          count: 0,
-        },
-        {
-          id: '#71',
-          name:'Pumpkin1',
-          path: "images/products/pumpkin.jpeg",
-          coast: 11.49,
-          count: 0,
-        },
-        {
-          id: '#32',
-          name:'Potato2',
-          path: "images/products/potato.jpeg",
-          coast: 1.99,
-          count: 0,
-        },
-        {
-          id: '#42',
-          name:'Cucumber2',
-          path: "images/products/cucumber.jpeg",
-          coast: 2.49,
-          count: 0,
-        },
-        {
-          id: '#52',
-          name:'Broccoli2',
-          path: "images/products/broccoli.jpeg",
-          coast: 21.99,
-          count: 0,
-        },
-        {
-          id: '#62',
-          name:'Onion2',
-          path: "images/products/onion.jpeg",
-          coast: 0.99,
-          count: 0,
-        },
-        {
-          id: '#72',
-          name:'Pumpkin2',
-          path: "images/products/pumpkin.jpeg",
-          coast: 11.49,
-          count: 0,
-        }
-        ],
+      products: Products,
       cart: [],
       cartIsVisible: false,
       width:0,
