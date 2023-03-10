@@ -1,6 +1,6 @@
 import React from 'react';
 import Grid from '@mui/material/Grid';
-import ProductCard from './ProductCard';
+import ProductCard from './ProductCard/ProductCard';
   
   class ProductList extends React.Component {
   

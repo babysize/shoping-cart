@@ -2,9 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Cart from './components/Cart';
+import Cart from './components/Cart/Cart';
 import ProductList from './components/ProductList';
 import Products from './resourses/Products.json'
+import { width } from '@mui/system';
 
 class Shop extends React.Component {
   constructor(props) {
@@ -13,7 +14,7 @@ class Shop extends React.Component {
       products: Products,
       cart: [],
       cartIsVisible: false,
-      width:0,
+      width:window.innerWidth,
       scroll:0,
     }
   }
@@ -119,18 +120,19 @@ class Shop extends React.Component {
       <Grid container spacing={2}>
       <Grid item xs={12} lg={9}>
         <ProductList products={this.state.products}
-                    addNewProductInCart={product => this.addNewProductInCart(product)}
-                    changeCountByOne={(id,count,isAdd) => this.changeCountByOne(id,count,isAdd)}
+                     addNewProductInCart={product => this.addNewProductInCart(product)}
+                     changeCountByOne={(id,count,isAdd) => this.changeCountByOne(id,count,isAdd)}
         />
         </Grid>
         <Grid item lg={3}>
         <Cart cart={this.state.cart}
-                      isVisible={this.state.cartIsVisible}
-                      onClick={cartIsVisible => this.showCart(cartIsVisible)}
-                      changeCountByOne={(id,count,isAdd) => this.changeCountByOne(id,count,isAdd)}
-                      deletProductFromCart={id => this.deletProductFromCart(id)}
-                      handleChangeCount={(id,number) => this.handleChangeCount(id,number)}
-                      editCount={(id,count) => this.editCount(id,count)}
+              isVisible={this.state.cartIsVisible}
+              onClick={cartIsVisible => this.showCart(cartIsVisible)}
+              changeCountByOne={(id,count,isAdd) => this.changeCountByOne(id,count,isAdd)}
+              deletProductFromCart={id => this.deletProductFromCart(id)}
+              handleChangeCount={(id,number) => this.handleChangeCount(id,number)}
+              editCount={(id,count) => this.editCount(id,count)}
+              width={this.state.width}
         />
         </Grid>
       </Grid>
